@@ -31,6 +31,8 @@ void EjectDLL(HMODULE hModule) {
 };
 
 int DisableHooks() {
+	FreeConsole();
+
 	if (MH_DisableHook(MH_ALL_HOOKS) != MH_OK) {
 		return 1;
 	}
@@ -124,7 +126,7 @@ int SendFromClipboard() {
 
 DWORD WINAPI MainThread(LPVOID lpModule) {
 
-	while (1) {
+	while (bRunning) {
 		if (GetAsyncKeyState(VK_F1) & 1) {
 			bLogSend = !bLogSend;
 			printf("[bLogSend - %s]\n", bLogSend ? "true" : "false");
@@ -147,6 +149,7 @@ DWORD WINAPI MainThread(LPVOID lpModule) {
 		Sleep(10);
 	}
 
+	//EjectDLL(reinterpret_cast<HMODULE>(lpModule));
 	return 0;
 }
 
@@ -155,12 +158,16 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD_PTR ul_reason_for_call, LPVOID lpRe
 	switch (ul_reason_for_call) {
 	case DLL_PROCESS_ATTACH:
 		DisableThreadLibraryCalls(hModule);
+		bRunning = true;
+		bLogRecv = true;
+		bLogSend = true;
 		CreateThread(NULL, 0, MainThread, hModule, NULL, NULL);
 		CreateThread(NULL, 0, HookThread, hModule, NULL, NULL);
 		break;
 	case DLL_PROCESS_DETACH:
 	case DLL_THREAD_ATTACH:
 	case DLL_THREAD_DETACH:
+		bRunning = false;
 		DisableHooks();
 		break;
 	}

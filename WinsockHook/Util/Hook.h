@@ -1,11 +1,13 @@
 #pragma once
 #include <winsock.h>
 
-#define MINPACKETLEN 5
+#define MINPACKETLEN 0
+#define MAXPACKETLEN 5000
 
 extern SOCKET mySock;
 extern bool bLogRecv;
 extern bool bLogSend;
+extern bool bRunning;
 
 // HOOKS
 

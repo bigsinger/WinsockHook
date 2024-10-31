@@ -5,6 +5,7 @@
 
 bool bLogRecv = false;
 bool bLogSend = false;
+bool bRunning = false;
 
 SOCKET mySock = 0;
 int (WINAPI *precv)(SOCKET socket, char* buffer, int length, int flags) = NULL;
@@ -21,15 +22,11 @@ int WINAPI MyRecv(SOCKET socket, char* buffer, int length, int flags)
 	}
 
 	if (bLogRecv && length > MINPACKETLEN) {
-		printf("[Recv-%d:%d] ", length, flags);
-		util::Log("[Recv-%d:%d] ", length, flags);
-		for (int i = 0; i < length; i++)
-		{
-			printf("%02X ", (unsigned char)buffer[i]);
-			util::Log("%02X ", (unsigned char)buffer[i]);
-		}
-		printf("\n");
-		util::Log("\n");
+		char msg[MAXPACKETLEN];
+		int size = length >= MAXPACKETLEN ? MAXPACKETLEN - 2 : length;
+		memcpy(msg, buffer, size);
+		msg[size] = '\0';
+		util::Log("[Winsock]recv socket: %d len: %d buffer: %s\n", socket, length, msg);
 	}
 
 	return precv(socket, buffer, length, flags);
@@ -42,38 +39,29 @@ int WINAPI MyRecvfrom(SOCKET socket, char* buffer, int length, int flags, sockad
 	}
 
 	if (bLogRecv && length > MINPACKETLEN) {
-		printf("[Recv-%d:%d] ", length, flags);
-		util::Log("[Recv-%d:%d] ", length, flags);
-		for (int i = 0; i < length; i++) {
-			printf("%02X ", (unsigned char)buffer[i]);
-			util::Log("%02X ", (unsigned char)buffer[i]);
-		}
-		printf("\n");
-		util::Log("\n");
+		char msg[MAXPACKETLEN];
+		int size = length >= MAXPACKETLEN ? MAXPACKETLEN -2 : length;
+		memcpy(msg, buffer, size);
+		msg[size] = '\0';
+		util::Log("[Winsock]recvfrom socket: %d len: %d buffer: %s\n", socket, length, msg);
 	}
 
-	return precv(socket, buffer, length, flags);
+	return precvfrom(socket, buffer, length, flags, from, fromlen);
 }
 
 
-int WINAPI MySend(SOCKET socket, const char* buffer, int length, int flags)
-{
+int WINAPI MySend(SOCKET socket, const char* buffer, int length, int flags) {
 	if (mySock == 0) {
 		util::Log("[SOCKET - %d]\n", socket);
 		mySock = socket;
 	}
 
-	if (bLogSend && length > MINPACKETLEN)
-	{
-		printf("[Send-%d:%d] ", length, flags);
-		util::Log("[Send-%d:%d] ", length, flags);
-		for (int i = 0; i < length; i++)
-		{
-			printf("%02X ", (unsigned char)buffer[i]);
-			util::Log("%02X ", (unsigned char)buffer[i]);
-		}
-		printf("\n");
-		util::Log("\n");
+	if (bLogSend && length > MINPACKETLEN) {
+		char msg[MAXPACKETLEN];
+		int size = length >= MAXPACKETLEN ? MAXPACKETLEN - 2 : length;
+		memcpy(msg, buffer, size);
+		msg[size] = '\0';
+		util::Log("[Winsock]send socket: %d len: %d buffer: %s\n", socket, length, msg);
 	}
 	return psend(socket, buffer, length, flags);
 }
@@ -85,14 +73,11 @@ int WINAPI MySendto(SOCKET socket, const char* buffer, int length, int flags, co
 	}
 
 	if (bLogSend && length > MINPACKETLEN) {
-		printf("[Send-%d:%d] ", length, flags);
-		util::Log("[Send-%d:%d] ", length, flags);
-		for (int i = 0; i < length; i++) {
-			printf("%02X ", (unsigned char)buffer[i]);
-			util::Log("%02X ", (unsigned char)buffer[i]);
-		}
-		printf("\n");
-		util::Log("\n");
+		char msg[MAXPACKETLEN];
+		int size = length >= MAXPACKETLEN ? MAXPACKETLEN - 2 : length;
+		memcpy(msg, buffer, size);
+		msg[size] = '\0';
+		util::Log("[Winsock]sendto socket: %d len: %d buffer: %s\n", socket, length, msg);
 	}
-	return psend(socket, buffer, length, flags);
+	return psendto(socket, buffer, length, flags, to, tolen);
 }

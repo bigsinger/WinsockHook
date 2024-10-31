@@ -40,19 +40,14 @@ HMODULE util::GetCurrentModule()
 	return hModule;
 }
 
-void util::Log(const char *fmt, ...)
-{
+void util::Log(const char* fmt, ...) {
 	if (!fmt)	return;
-
 	char		text[4096];
 	va_list		ap;
 	va_start(ap, fmt);
 	vsprintf_s(text, fmt, ap);
 	va_end(ap);
 
-	std::ofstream logfile("C:\\Users\\Pawel\\Desktop\\log.txt", std::ios::app);
-	if (logfile.is_open() && text) {
-		logfile << text;
-	}
-	logfile.close();
-}
+	printf(text);
+	OutputDebugString(text);
+}	
