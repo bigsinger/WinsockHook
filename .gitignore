@@ -1,0 +1,4 @@
+/.vs
+/WinsockHook/*.user
+bin
+temp
